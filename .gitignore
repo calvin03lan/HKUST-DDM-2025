@@ -1,0 +1,226 @@
+# ============================================
+# Python virtual environments
+# ============================================
+.venv/
+venv/
+venv_mac/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+
+# ============================================
+# macOS system files
+# ============================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ============================================
+# IDE & editor
+# ============================================
+.vscode/
+.idea/
+.ipynb_checkpoints/
+
+# ============================================
+# Course lecture slides (copyrighted)
+# ============================================
+**/Lecture Slides/
+**/LectureSlides/
+
+# ============================================
+# Raw datasets
+# ============================================
+*.csv
+*.npz
+*.npy
+*.bz2
+*.gz
+*.tar.gz
+*.zip
+*.xz
+*.lzma
+*.gzip
+
+# ============================================
+# Data / cache directories
+# ============================================
+**/raw_data/
+**/fastf1_cache/
+**/f1_cache/
+**/f1cache/
+**/.fastf1_cache/
+**/yf_cache/
+**/data/raw/
+
+# ============================================
+# Raw data formats
+# ============================================
+*.ndjson
+*.ff1pkl
+*.pkl
+*.mat
+*.arff
+*.dat
+*.parquet
+*.feather
+
+# ============================================
+# Cache databases
+# ============================================
+*.sqlite
+*.db
+
+# ============================================
+# Model / checkpoint files
+# ============================================
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.hdf5
+*.pb
+*.onnx
+*.sav
+
+# ============================================
+# Compiled / build artifacts
+# ============================================
+build/
+dist/
+*.so
+*.o
+*.a
+*.lib
+*.dylib
+*.exe
+
+# ============================================
+# Non-code documents (not your own work)
+# ============================================
+*.pptx
+*.docx
+*.xlsx
+*.numbers
+*.pages
+*.key
+
+# ============================================
+# Course-provided materials (copyrighted)
+# ============================================
+*Final_Exam*
+*Cheatsheet*
+*cheat_sheet*
+*course information*
+*PhysRev*
+*Professor E*
+*Conversation History*
+
+# Course assignment briefs
+**/Assignment_*.pdf
+**/Assignment-*.pdf
+**/assignment_*.pdf
+**/assignment-*.pdf
+**/Assign*.pdf
+**/assign*.pdf
+
+# Course homework briefs (not your submissions)
+**/MSDM*-HW*.pdf
+**/MSDM*HW*.pdf
+**/hw0*_spring*.pdf
+**/hw0*.pdf
+**/project1_*_spring*.pdf
+**/project1*.pdf
+**/Project_1.pdf
+**/Project_2.pdf
+**/Project_I.pdf
+**/Project_II.pdf
+**/MSDM*Project*.pdf
+**/MSDM*project*.pdf
+
+# Problem sets (course-provided)
+**/PS[0-9]*.pdf
+**/PS*.docx
+
+# Quiz papers (keep your own quiz answers with your name)
+**/Quiz/Quiz_[0-9].pdf
+**/Quiz/Quiz_[0-9][0-9].pdf
+
+# Tutorial materials
+**/Tutorial/
+
+# Midterm assignment briefs (not your submission)
+**/Midterm project*.pdf
+
+# Generic homework brief PDFs
+**/Homework [0-9].pdf
+**/Homework *.pdf
+**/HW [0-9]*.pdf
+
+# Course assignment briefs (generic names)
+**/*Assignment*.pdf
+**/*assignment*.pdf
+
+# Supplementary question files
+**/Question_[0-9]*.pdf
+
+# Sample / example files provided by course
+**/example*.pdf
+
+# External presentations / guest lectures
+**/HKUST-Your-Future*.pdf
+**/Reflection*/Professor E*.pdf
+
+# Third-party reports in group projects
+**/_legacy/
+
+# ============================================
+# Bibliography (course-provided references)
+# ============================================
+*.bib
+
+# ============================================
+# MATLAB files (course-provided)
+# ============================================
+*.m
+*.mat
+
+# ============================================
+# OVERRIDE: Keep your own submitted PDFs
+# (files with your name or report-type naming)
+# ============================================
+!*LAN_Tianwei*.pdf
+!*LAN,Tianwei*.pdf
+!*_LTW.pdf
+!*_Final_Report*.pdf
+!*_Midterm_Project*.pdf
+!*_Project_*_Report*.pdf
+!*_HW*_Writing*.pdf
+!*HW*_LAN*.pdf
+!*grp*_report*.pdf
+!*comparison_report*.pdf
+
+# ============================================
+# SUMMARY:
+# ✅ UPLOADED (tracked):
+#    .ipynb .py .sh .sql .html .md .tex .json .toml .lock
+#    .png .gif .jpg .jpeg .svg .c .pyx .pxd .h .hpp .cpp
+#    .txt .cfg .ini .yaml .css .js .tsx .template .jinja
+#    + student PDFs matching the ! patterns above
+#
+# ❌ EXCLUDED:
+#    datasets .csv .npz .npy .ndjson .ff1pkl .pkl .mat .arff
+#    models .pth .pt .ckpt .h5 .sav
+#    caches .sqlite .db **/fastf1_cache/ **/f1cache/ **/yf_cache/
+#    raw data .bz2 .gz .zip .xz **/raw_data/ **/data/raw/
+#    lectures **/Lecture Slides/
+#    course docs assignment PDFs, quiz papers, exam info, cheat sheets
+#    office docs .pptx .docx .xlsx .numbers
+#    system .DS_Store .venv/ __pycache__/ build/
+#
+# ⚠️  Before pushing, run: git status
+#     to review tracked files. Force-add with: git add -f <file>
+#     Force-ignore any missed course PDF by adding a rule above.
+# ============================================

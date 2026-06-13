@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Draw — 实时手绘识别</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f1f5f9;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --primary: #6366f1;
+  --primary-light: #eef2ff;
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --canvas-bg: #ffffff;
+  --canvas-border: #cbd5e1;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --primary: #818cf8;
+  --primary-light: #1e1b4b;
+  --success: #34d399;
+  --success-bg: #022c22;
+  --danger: #f87171;
+  --danger-bg: #2d1b1b;
+  --canvas-bg: #f8fafc;
+  --canvas-border: #475569;
+  --shadow: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.4);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--card-border);
+  box-shadow: var(--shadow);
+  position: sticky; top: 0; z-index: 100;
+}
+.header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+.header h1 span { color: var(--primary); }
+.header-actions { display: flex; gap: 8px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  font-size: 0.875rem; font-weight: 500; cursor: pointer;
+  border: 1px solid var(--card-border); background: var(--card-bg);
+  color: var(--text); transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { opacity: 0.9; color: #fff; }
+.btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+.btn-success:hover { opacity: 0.9; }
+.btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-danger:hover { opacity: 0.9; }
+.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+
+.main {
+  display: grid;
+  grid-template-columns: 260px 1fr 340px;
+  gap: 16px;
+  padding: 16px 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  height: calc(100vh - 60px);
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;
+}
+
+/* ---- Left: Category Selection ---- */
+.category-panel { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.group-label {
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--primary); padding: 0 4px;
+}
+.cat-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.cat-btn {
+  padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;
+  cursor: pointer; border: 1.5px solid var(--card-border);
+  background: var(--card-bg); color: var(--text);
+  transition: all var(--transition);
+}
+.cat-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+.cat-btn.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+.selected-category {
+  margin-top: auto; padding: 12px; background: var(--primary-light);
+  border-radius: var(--radius-sm); text-align: center;
+}
+.selected-category .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.selected-category .name { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-top: 2px; }
+
+/* ---- Center: Canvas ---- */
+.canvas-panel { display: flex; flex-direction: column; gap: 10px; }
+.canvas-wrapper {
+  flex: 1; position: relative; border-radius: var(--radius);
+  overflow: hidden; border: 2px solid var(--canvas-border);
+  background: var(--canvas-bg); cursor: crosshair;
+  min-height: 0;
+}
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.canvas-toolbar { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+/* ---- Right: Predictions ---- */
+.right-panel {
+  display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+}
+
+.prediction-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  padding: 8px 12px; border-radius: var(--radius-sm); position: relative;
+  overflow: hidden;
+}
+.prediction-bar .rank { font-weight: 700; font-size: 1rem; width: 24px; text-align: center; color: var(--text-secondary); }
+.prediction-bar .name { font-weight: 600; font-size: 0.9rem; width: 90px; flex-shrink: 0; }
+.prediction-bar .bar-track { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.prediction-bar .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease, background 0.3s ease; }
+.prediction-bar .pct { font-weight: 600; font-size: 0.85rem; width: 50px; text-align: right; color: var(--text); }
+.prediction-bar.rank-1 .bar-fill { background: var(--primary); }
+.prediction-bar.rank-2 .bar-fill { background: #94a3b8; }
+.prediction-bar.rank-3 .bar-fill { background: #cbd5e1; }
+
+.no-prediction { text-align: center; padding: 24px; color: var(--text-secondary); font-size: 0.9rem; }
+
+/* Analysis results */
+.analysis-section { flex-shrink: 0; }
+.analysis-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 6px; margin-bottom: 4px;
+  font-size: 0.82rem; transition: background var(--transition);
+}
+.analysis-row .ratio-badge {
+  font-weight: 700; font-size: 0.75rem; min-width: 40px;
+  padding: 2px 6px; border-radius: 4px; text-align: center;
+  background: var(--bg); color: var(--text-secondary);
+}
+.analysis-row .guess { font-weight: 600; flex: 1; }
+.analysis-row .prob { font-weight: 500; color: var(--text-secondary); min-width: 45px; text-align: right; }
+.analysis-row.correct { background: var(--success-bg); }
+.analysis-row.correct .ratio-badge { background: var(--success); color: #fff; }
+.analysis-row.correct .guess { color: var(--success); }
+.analysis-row.wrong { background: var(--danger-bg); }
+.analysis-row.wrong .ratio-badge { background: var(--danger); color: #fff; }
+.analysis-row.wrong .guess { color: var(--danger); }
+
+/* Theme toggle icon */
+.theme-icon { font-size: 1.1rem; line-height: 1; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 2px; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .main { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+  .category-panel { flex-direction: row; flex-wrap: wrap; gap: 6px; overflow-y: visible; }
+  .right-panel { max-height: none; }
+}
+@media (max-width: 640px) {
+  .header { padding: 8px 12px; }
+  .header h1 { font-size: 1rem; }
+  .main { padding: 8px; gap: 8px; }
+  .card { padding: 10px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1><span>Quick Draw</span> — <span id="header-subtitle">实时手绘识别</span></h1>
+  <div class="header-actions">
+    <button class="btn btn-sm" id="btn-theme" title="Toggle theme">
+      <span class="theme-icon">🌙</span>
+    </button>
+    <button class="btn btn-sm" id="btn-lang" title="Switch language">EN</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- Left: Category Selection -->
+  <div class="card category-panel" id="category-panel">
+    <div class="card-title" data-i18n="choose_category">Choose Category</div>
+    <div id="category-groups"></div>
+    <div class="selected-category" id="selected-category-box">
+      <div class="label" data-i18n="your_target">Your Target</div>
+      <div class="name" id="selected-category-name">—</div>
+    </div>
+  </div>
+
+  <!-- Center: Canvas -->
+  <div class="card canvas-panel">
+    <div class="canvas-wrapper" id="canvas-wrapper">
+      <canvas id="draw-canvas"></canvas>
+    </div>
+    <div class="canvas-toolbar">
+      <button class="btn" id="btn-clear" data-i18n="clear">清空</button>
+      <button class="btn" id="btn-undo" data-i18n="undo">撤销</button>
+      <button class="btn btn-success" id="btn-finish" data-i18n="finish">完成</button>
+    </div>
+  </div>
+
+  <!-- Right: Predictions + Analysis -->
+  <div class="right-panel">
+    <div class="card" id="prediction-card">
+      <div class="card-title" data-i18n="live_prediction">Live Prediction</div>
+      <div id="predictions-container">
+        <div class="no-prediction" data-i18n="start_drawing">动笔即可看到预测结果</div>
+      </div>
+    </div>
+    <div class="card analysis-section" id="analysis-card" style="display:none;">
+      <div class="card-title" data-i18n="completion_analysis">Completion Analysis</div>
+      <div id="analysis-container"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== i18n ====================
+const I18N = {
+  zh: {
+    header_subtitle: '实时手绘识别',
+    choose_category: '选择类别',
+    your_target: '绘制目标',
+    clear: '清空',
+    undo: '撤销',
+    finish: '完成',
+    live_prediction: '实时预测',
+    start_drawing: '动笔即可看到预测结果',
+    completion_analysis: '完成度分析',
+    shapes: '形状',
+    objects: '物品',
+    fruit: '水果',
+    animals: '动物',
+    category_names: {
+      circle:'圆形', sun:'太阳', donut:'甜甜圈', wheel:'车轮', clock:'时钟',
+      umbrella:'雨伞', lollipop:'棒棒糖', hammer:'锤子', toothbrush:'牙刷', spoon:'勺子',
+      apple:'苹果', pear:'梨', banana:'香蕉', strawberry:'草莓',
+      cat:'猫', dog:'狗', bear:'熊', mouse:'老鼠', rabbit:'兔子'
+    },
+  },
+  en: {
+    header_subtitle: 'Real-time Sketch Recognition',
+    choose_category: 'Choose Category',
+    your_target: 'Your Target',
+    clear: 'Clear',
+    undo: 'Undo',
+    finish: 'Finish',
+    live_prediction: 'Live Prediction',
+    start_drawing: 'Start drawing to see predictions',
+    completion_analysis: 'Completion Analysis',
+    shapes: 'Shapes',
+    objects: 'Objects',
+    fruit: 'Fruit',
+    animals: 'Animals',
+    category_names: {
+      circle:'Circle', sun:'Sun', donut:'Donut', wheel:'Wheel', clock:'Clock',
+      umbrella:'Umbrella', lollipop:'Lollipop', hammer:'Hammer', toothbrush:'Toothbrush', spoon:'Spoon',
+      apple:'Apple', pear:'Pear', banana:'Banana', strawberry:'Strawberry',
+      cat:'Cat', dog:'Dog', bear:'Bear', mouse:'Mouse', rabbit:'Rabbit'
+    },
+  }
+};
+
+let lang = 'zh';
+function t(key) { return I18N[lang][key] || key; }
+function tCat(name) { return I18N[lang].category_names[name] || name; }
+
+const CATEGORIES = [
+  "circle","sun","donut","wheel","clock",
+  "umbrella","lollipop","hammer","toothbrush","spoon",
+  "apple","pear","banana","strawberry",
+  "cat","dog","bear","mouse","rabbit"
+];
+const GROUPS = {
+  shapes: ["circle","sun","donut","wheel","clock"],
+  objects: ["umbrella","lollipop","hammer","toothbrush","spoon"],
+  fruit: ["apple","pear","banana","strawberry"],
+  animals: ["cat","dog","bear","mouse","rabbit"]
+};
+
+// ==================== State ====================
+let selectedCategory = null;
+let rawPoints = [];         // [{x, y, newStroke}] — flat array of all drawn points
+let isDrawing = false;
+let strokeStartIdx = 0;     // index in rawPoints where current stroke started
+let lastPredictTime = 0;
+const PREDICT_THROTTLE = 100;
+
+// ==================== Canvas Setup ====================
+const canvas = document.getElementById('draw-canvas');
+const ctx = canvas.getContext('2d');
+const wrapper = document.getElementById('canvas-wrapper');
+
+function resizeCanvas() {
+  const rect = wrapper.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 3;
+}
+resizeCanvas();
+window.addEventListener('resize', () => { resizeCanvas(); redrawAll(); });
+
+// ==================== Drawing ====================
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  if (e.touches) {
+    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+  }
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function startStroke(e) {
+  e.preventDefault();
+  isDrawing = true;
+  const pos = getPos(e);
+  strokeStartIdx = rawPoints.length;
+  rawPoints.push({ x: pos.x, y: pos.y, newStroke: 1 });
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+}
+
+function continueStroke(e) {
+  e.preventDefault();
+  if (!isDrawing) return;
+  const pos = getPos(e);
+  rawPoints.push({ x: pos.x, y: pos.y, newStroke: 0 });
+  ctx.lineTo(pos.x, pos.y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pos.x, pos.y);
+}
+
+function endStroke(e) {
+  e.preventDefault();
+  isDrawing = false;
+}
+
+canvas.addEventListener('mousedown', startStroke);
+canvas.addEventListener('mousemove', continueStroke);
+canvas.addEventListener('mouseup', endStroke);
+canvas.addEventListener('mouseleave', endStroke);
+canvas.addEventListener('touchstart', startStroke, { passive: false });
+canvas.addEventListener('touchmove', continueStroke, { passive: false });
+canvas.addEventListener('touchend', endStroke);
+canvas.addEventListener('touchcancel', endStroke);
+
+// ==================== Redraw ====================
+function redrawAll() {
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 3;
+
+  let i = 0;
+  while (i < rawPoints.length) {
+    ctx.beginPath();
+    ctx.moveTo(rawPoints[i].x, rawPoints[i].y);
+    i++;
+    while (i < rawPoints.length && rawPoints[i].newStroke !== 1) {
+      ctx.lineTo(rawPoints[i].x, rawPoints[i].y);
+      i++;
+    }
+    ctx.stroke();
+  }
+}
+
+// ==================== RDP Simplification ====================
+function perpendicularDistance(point, lineStart, lineEnd) {
+  let dx = lineEnd.x - lineStart.x;
+  let dy = lineEnd.y - lineStart.y;
+  const mag = Math.hypot(dx, dy);
+  if (mag > 0) { dx /= mag; dy /= mag; }
+  const pvx = point.x - lineStart.x;
+  const pvy = point.y - lineStart.y;
+  const pvdot = dx * pvx + dy * pvy;
+  const projx = lineStart.x + pvdot * dx;
+  const projy = lineStart.y + pvdot * dy;
+  return Math.hypot(point.x - projx, point.y - projy);
+}
+
+function simplifyRDP(points, epsilon) {
+  if (points.length <= 2) return points;
+  let dmax = 0, index = 0;
+  const end = points.length - 1;
+  for (let i = 1; i < end; i++) {
+    const d = perpendicularDistance(points[i], points[0], points[end]);
+    if (d > dmax) { index = i; dmax = d; }
+  }
+  if (dmax > epsilon) {
+    const left = simplifyRDP(points.slice(0, index + 1), epsilon);
+    const right = simplifyRDP(points.slice(index), epsilon);
+    return left.slice(0, -1).concat(right);
+  }
+  return [points[0], points[end]];
+}
+
+// ==================== Stroke Preprocessing ====================
+function preprocessStrokes(pts) {
+  if (pts.length < 2) return [];
+
+  // 1. Separate into strokes
+  const strokes = [];
+  let cur = [];
+  for (const p of pts) {
+    if (p.newStroke === 1 && cur.length > 0) {
+      strokes.push(cur);
+      cur = [];
+    }
+    cur.push(p);
+  }
+  if (cur.length > 0) strokes.push(cur);
+
+  // 2. RDP simplify each stroke (epsilon=2.0 matches Quick Draw characteristics)
+  const simplified = [];
+  for (const stroke of strokes) {
+    const reduced = simplifyRDP(stroke, 2.0);
+    for (let i = 0; i < reduced.length; i++) {
+      simplified.push({ x: reduced[i].x, y: reduced[i].y, newStroke: i === 0 ? 1 : 0 });
+    }
+  }
+
+  if (simplified.length < 2) return [];
+
+  // 3. Bounding-box scaling (adaptive, like Google Quick Draw's preprocessing)
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of simplified) {
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+  const width = Math.max(maxX - minX, 1);
+  const height = Math.max(maxY - minY, 1);
+  const scale = 255.0 / Math.max(width, height);
+
+  // 4. Compute deltas — always compute translation vector, even across stroke boundaries
+  const modelInput = [];
+  let prevX = simplified[0].x;
+  let prevY = simplified[0].y;
+  for (let i = 0; i < simplified.length; i++) {
+    const p = simplified[i];
+    let dx = 0, dy = 0;
+    if (i > 0) {
+      dx = (p.x - prevX) * scale;
+      dy = (p.y - prevY) * scale;
+    }
+    modelInput.push([dx, dy, p.newStroke]);
+    prevX = p.x;
+    prevY = p.y;
+  }
+  return modelInput;
+}
+
+// ==================== API Calls ====================
+async function apiPredict() {
+  if (rawPoints.length < 2) return;
+  const now = Date.now();
+  if (now - lastPredictTime < PREDICT_THROTTLE) return;
+  lastPredictTime = now;
+
+  const processed = preprocessStrokes(rawPoints);
+  if (processed.length < 2) return;
+  try {
+    const resp = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ strokes: processed }),
+    });
+    const data = await resp.json();
+    renderPredictions(data.top3);
+  } catch (err) {
+    console.error('Predict error:', err);
+  }
+}
+
+async function apiAnalyze() {
+  if (rawPoints.length < 2) return;
+  const processed = preprocessStrokes(rawPoints);
+  if (processed.length < 2) return;
+  try {
+    const resp = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ strokes: processed }),
+    });
+    const data = await resp.json();
+    renderAnalysis(data.results);
+  } catch (err) {
+    console.error('Analyze error:', err);
+  }
+}
+
+// ==================== Render ====================
+function renderPredictions(top3) {
+  const container = document.getElementById('predictions-container');
+  if (!top3 || top3.length === 0) {
+    container.innerHTML = `<div class="no-prediction">${t('start_drawing')}</div>`;
+    return;
+  }
+  container.innerHTML = top3.map((p, i) => {
+    const pct = (p.probability * 100).toFixed(1);
+    return `
+      <div class="prediction-bar rank-${i + 1}">
+        <span class="rank">#${i + 1}</span>
+        <span class="name">${tCat(p.category)}</span>
+        <span class="bar-track"><span class="bar-fill" style="width:${pct}%"></span></span>
+        <span class="pct">${pct}%</span>
+      </div>`;
+  }).join('');
+}
+
+function renderAnalysis(results) {
+  const card = document.getElementById('analysis-card');
+  const container = document.getElementById('analysis-container');
+  card.style.display = 'block';
+
+  container.innerHTML = results.map(r => {
+    if (!r.top1) return '';
+    const guessed = r.top1.category;
+    const prob = (r.top1.probability * 100).toFixed(1);
+    const correct = selectedCategory && guessed === selectedCategory;
+    const cls = correct ? 'correct' : 'wrong';
+    const icon = correct ? '✓' : '✗';
+    return `
+      <div class="analysis-row ${cls}">
+        <span class="ratio-badge">${r.ratio_label}</span>
+        <span class="guess">${icon} ${tCat(guessed)}</span>
+        <span class="prob">${prob}%</span>
+      </div>`;
+  }).join('');
+  card.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ==================== UI Actions ====================
+document.getElementById('btn-clear').addEventListener('click', () => {
+  rawPoints = [];
+  isDrawing = false;
+  const rect = canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
+  document.getElementById('predictions-container').innerHTML =
+    `<div class="no-prediction">${t('start_drawing')}</div>`;
+  document.getElementById('analysis-card').style.display = 'none';
+});
+
+document.getElementById('btn-undo').addEventListener('click', () => {
+  if (rawPoints.length === 0) return;
+  if (isDrawing) {
+    // Undo current stroke in progress
+    rawPoints = rawPoints.slice(0, strokeStartIdx);
+    isDrawing = false;
+  } else {
+    // Find start of last stroke and remove it
+    let lastStrokeStart = rawPoints.length - 1;
+    while (lastStrokeStart > 0 && rawPoints[lastStrokeStart].newStroke !== 1) {
+      lastStrokeStart--;
+    }
+    rawPoints = rawPoints.slice(0, lastStrokeStart);
+  }
+  redrawAll();
+  apiPredict();
+});
+
+document.getElementById('btn-finish').addEventListener('click', () => {
+  if (rawPoints.length < 2) return;
+  apiAnalyze();
+});
+
+document.getElementById('btn-theme').addEventListener('click', () => {
+  const html = document.documentElement;
+  const isLight = html.dataset.theme === 'light';
+  html.dataset.theme = isLight ? 'dark' : 'light';
+  document.querySelector('#btn-theme .theme-icon').textContent = isLight ? '☀️' : '🌙';
+  redrawAll();
+});
+
+document.getElementById('btn-lang').addEventListener('click', () => {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  document.getElementById('btn-lang').textContent = lang === 'zh' ? 'EN' : '中文';
+  refreshUI();
+});
+
+// ==================== Category Selection ====================
+function buildCategoryUI() {
+  const container = document.getElementById('category-groups');
+  container.innerHTML = Object.entries(GROUPS).map(([groupKey, cats]) => `
+    <div class="group-label">${t(groupKey)}</div>
+    <div class="cat-grid">
+      ${cats.map(c => `<button class="cat-btn" data-cat="${c}">${tCat(c)}</button>`).join('')}
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedCategory = btn.dataset.cat;
+      container.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      document.getElementById('selected-category-name').textContent = tCat(selectedCategory);
+    });
+  });
+}
+
+function refreshUI() {
+  document.getElementById('header-subtitle').textContent = t('header_subtitle');
+  document.querySelectorAll('.card-title[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.getElementById('btn-clear').textContent = t('clear');
+  document.getElementById('btn-undo').textContent = t('undo');
+  document.getElementById('btn-finish').textContent = t('finish');
+  document.getElementById('selected-category-box').querySelector('.label').textContent = t('your_target');
+  buildCategoryUI();
+  if (selectedCategory) {
+    document.getElementById('selected-category-name').textContent = tCat(selectedCategory);
+  }
+  document.getElementById('predictions-container').innerHTML =
+    `<div class="no-prediction">${t('start_drawing')}</div>`;
+  document.getElementById('analysis-card').style.display = 'none';
+}
+
+// ==================== Polling ====================
+let pollTimer = null;
+function startPolling() {
+  if (pollTimer) return;
+  pollTimer = setInterval(() => {
+    if (rawPoints.length >= 2) apiPredict();
+  }, PREDICT_THROTTLE);
+}
+
+canvas.addEventListener('mouseup', () => { apiPredict(); });
+canvas.addEventListener('touchend', () => { apiPredict(); });
+
+// ==================== Init ====================
+refreshUI();
+startPolling();
+</script>
+</body>
+</html>

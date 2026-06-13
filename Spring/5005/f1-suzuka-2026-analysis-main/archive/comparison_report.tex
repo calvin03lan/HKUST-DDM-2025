@@ -1,0 +1,62 @@
+% Data-centric AI comparison report (raw vs structured F1 telemetry)
+% Compile: pdflatex comparison_report.tex
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\title{Data-Centric AI: Comparing Lap Analysis from Raw versus Structured F1 Telemetry\\[0.3em]
+\large Piastri $\cdot$ Japan $\cdot$ 2026 (single-lap samples)}
+\author{}\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note compares two analyses of materially the same single-lap telemetry: one confined to raw merged exports, one augmented with project-defined engineered columns. The downstream analytic protocol (persona, refusal to invent session facts) is held similar; the controlled variable is \emph{tabular representation}---in the spirit of data-centric AI, not ``model ingenuity.''
+\end{abstract}
+
+\section{Purpose and framing}
+
+This report compares two analyses of what is materially the same single-lap telemetry---one confined to the raw export \path{piastri_2026_japan_fastest_lap_telemetry.csv} (\textbf{raw}), one using \path{piastri_2026_japan_structured.csv}, which adds heuristic engineering columns: \texttt{Corner\_Type}, \texttt{Driving\_State}, and distance-based deciles labelled \texttt{Mini\_Sector}. The downstream analytic tool (prompt and LLM persona) was intentionally similar: evidence-grounded narration, refusal to infer official lap or sector timing, tyre compound, weather, or other facts absent from the CSVs. The \textbf{controlled variable}, in a \textbf{data-centric AI} framing, is therefore \textbf{feature and table design}---not a change of foundation-model family.
+
+\section{Dataset differences beyond column count}
+
+\paragraph{Raw telemetry.}
+The raw file exposes \texttt{Speed}, throttle, brake, cumulative \texttt{Distance}, merge metadata (\texttt{Source}), and coordinates. Meaningful segmentation requires explicit analytic choices---for example quartiles by row index (Q1--Q4 as a heuristic) and slow-speed clusters cited by metre along \texttt{Distance}. The narrative can \emph{withhold} named corners because circuit geography is not keyed as text columns in this export.
+
+\paragraph{Structured telemetry.}
+The structured file \textbf{reuses identical sensor traces} yet relocates cognition from free-form slicing to preprocessing: categorical summaries of longitudinal intent (\texttt{Driving\_State} counts), coarse corner-style buckets (\texttt{Corner\_Type}), and ten distance bins (\texttt{Mini\_Sector}), enabling tabular summaries per mini-sector instead of hand-built cuts.
+
+\section{Aligned empirical anchors}
+
+Across both summaries, headline statistics \textbf{align}: \textbf{Speed} spans roughly $73$--$317$~km/h (FastF1-style magnitude); approximately \textbf{19\%} of samples have \texttt{Brake=True}; mean \texttt{Throttle} $\approx 65.8$; elapsed sample span near \textbf{93\,s}; the \textbf{DRS} column reads as uniformly inactive in this excerpt. Alignment on these anchors supports consistent empirical grounding despite different narrative affordances.
+
+\section{Outcomes: affordances versus epistemic risk}
+
+\subsection{What raw emphasizes}
+
+Raw-grounded prose excels at \textbf{calling out limits}: normalized \texttt{RelativeDistance} not reaching $1.0$; potential lap-boundary artefacts (e.g., high throttle simultaneously with braking at the earliest rows); ambiguity between interpolation and genuine coasting. These caveats are intellectually conservative and reduce over-claiming about driver technique.
+
+\subsection{What structured emphasizes}
+
+Structured analysis offers \textbf{immediate segment readability}: histogram-style views tying \texttt{Driving\_State} and heuristic corner labels to each \texttt{Mini\_Sector}, enabling shorthand such as dominance of transitional phases or comparatively high mean speed in bands like \texttt{MS\_8}--\texttt{MS\_9} without manual binning repetition. Fluency rises because labels collapse repeated statistical work into categorical columns---but each label inherits upstream threshold choices; readers may mistakenly equate heuristic tags with circuit truth or timing authority unless caveats persist.
+
+\section{Data-centric takeaway}
+
+Improvement attributable to switching inputs stems chiefly from \textbf{upstream representation}: engineered columns compress repeatable rules into shorthand that the same analytic scaffold can cite directly. That productivity gain is \textbf{not} immunity from telemetry limits (boolean brake, sparse merge), nor does it embed lateral tyre physics absent from columns.
+
+\section{Limitations statement}
+
+Neither table supports rival deltas, stint strategy, or optimised compound selection without additional data. Robust reporting should cross-check aggregates with a small scripted audit (ranges, percentages, grouped counts).
+
+\paragraph{Disclaimer.}
+Structured labels (\texttt{Corner\_Type}, etc.) remain \emph{project-defined}; distance mini-sectors are not FIA sector timers. Narrative flair must remain accountable to CSV evidence.
+
+\end{document}

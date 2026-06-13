@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(bash download_raw.sh)",
+      "Bash(pyenv versions *)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(read category *)",
+      "Bash(CLOUDSDK_PYTHON=/opt/homebrew/bin/python3.12 gsutil cp gs://quickdraw_dataset/full/simplified/__TRACKED_VAR__.ndjson ./raw_data/)",
+      "Bash(CLOUDSDK_PYTHON=/opt/homebrew/bin/python3.12 gsutil cp \"gs://quickdraw_dataset/full/simplified/rabbit.ndjson\" ./raw_data/)"
+    ]
+  }
+}

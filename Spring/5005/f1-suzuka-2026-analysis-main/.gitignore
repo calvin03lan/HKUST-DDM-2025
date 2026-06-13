@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# FastF1 cache
+.cache/
+
+# IDE / Cursor
+.cursor/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+
+# OS files
+.DS_Store

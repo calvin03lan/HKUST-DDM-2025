@@ -1,0 +1,4 @@
+nbconvert
+nbformat
+jupyter
+traitlets

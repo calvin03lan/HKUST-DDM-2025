@@ -1,0 +1,1 @@
+python -m jupyter nbconvert --to html "5004_HW2.ipynb"

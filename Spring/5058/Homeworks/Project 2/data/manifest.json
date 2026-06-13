@@ -1,0 +1,79 @@
+{
+  "AAL": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "031bc93b7e40a039492bcc50bcf8c9ef0a815e6e15187fbf641f333ed3bf3dd8",
+    "source": "yfinance:AAL"
+  },
+  "DAL": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "f444c5862552a6f73141aca48486093a681da1c3160768cc5696c33de362d683",
+    "source": "yfinance:DAL"
+  },
+  "SPY": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "f2584c282f1d3beb663aa26f0292405fe778572f4f769da796aba95706a3a3de",
+    "source": "yfinance:SPY"
+  },
+  "QQQ": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "cfdbd10d8bf238eff69fc81cd51d6587815ebfd40e7c3f970b3b0bcc9da42b6e",
+    "source": "yfinance:QQQ"
+  },
+  "XLK": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "a2632805a18de3037cccc2b73e7d15e3a075d2b5e1a0101a6239cda0f80dadee",
+    "source": "yfinance:XLK"
+  },
+  "VIX": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "d23aa7b7af350d6dc7eaf55e87e08a6709b500be37cd229821841786bbf85501",
+    "source": "yfinance:^VIX"
+  },
+  "TNX": {
+    "rows": 4588,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "95589424f50329e95d71f7626f7981d12917c9a35c86e1f1fc812dc18389c626",
+    "source": "yfinance:^TNX"
+  },
+  "DXY": {
+    "rows": 4591,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "5b57678796ac86565a54c7e31dc2d65963f7ac70874586c6edaa3bb3b9ec6980",
+    "source": "yfinance:DX-Y.NYB"
+  },
+  "IXIC": {
+    "rows": 4590,
+    "start": "2008-01-02",
+    "end": "2026-03-31",
+    "sha256": "54b615e99df5a4374fc8e9210170561b869c9774332ae4479d1a4e4d73e22d40",
+    "source": "yfinance:^IXIC"
+  },
+  "short_volume": {
+    "rows": 1927,
+    "start": "2017-12-29",
+    "end": "2026-03-31",
+    "sha256": "512b7d1a32cfc4ffdd236a26aaecfdf0574a4beac86b1f35d2be3bd70b570fe8",
+    "source": "FINRA RegSHO daily"
+  },
+  "pcr": {
+    "rows": 9183,
+    "start": "1990-01-02",
+    "end": "2026-05-12",
+    "sha256": "7f9931994062d60854fd0068d9492a382491a1a304dd34f93154fb113f3deb55",
+    "source": "CBOE VIX -> PCR proxy"
+  }
+}
