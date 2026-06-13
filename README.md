@@ -26,18 +26,18 @@ This repository archives my coursework, projects, and code from the **MSc in Dat
 ```
 DDMcourse/
 ├── Autumn/                  # 2025 Fall Semester · 秋季学期
-│   ├── 5001/                # Computational Methods
-│   ├── 5002/                # Scientific Computing
-│   ├── 5003/                # Statistical Physics / Data Analysis
-│   ├── 5051/                # Algorithms & Data Structures
-│   └── 5054/                # Machine Learning
+│   ├── 5001/                # Introduction to Computational and Modeling Tools
+│   ├── 5002/                # Scientific Programming and Visualization
+│   ├── 5003/                # Stochastic Processes and Applications
+│   ├── 5051/                # Algorithms & OOP for Modeling
+│   └── 5054/                # Statistic Machine Learning
 │
 ├── Spring/                  # 2026 Spring Semester · 春季学期
-│   ├── 5004/                # Modeling & Simulation
-│   ├── 5005/                # Data Engineering (F1 Analytics)
-│   ├── 5053/                # Advanced Topics in Data Science
-│   ├── 5055/                # Deep Learning & AI
-│   └── 5058/                # Statistics & Data Analysis
+│   ├── 5004/                # Numerical Methods & Modeling in Science
+│   ├── 5005/                # Innovation in Practice
+│   ├── 5053/                # Quatitative Analysis of Time Series
+│   ├── 5055/                # Deep Learning for Modeling: Concepts, Tools, and Techniques
+│   └── 5058/                # Infomation Science
 │
 ├── .gitignore               # Excludes copyrighted course materials
 └── README.md                # This file
